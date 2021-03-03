@@ -11,16 +11,27 @@
                 </tr>
             </tbody>
         </table>
+        Use backend
+        <button :style="currentBackend.provider == 'aws' ? 'background: green' : ''" @click="switchBackendTo('aws')">AWS</button>
+        <button :style="currentBackend.provider == 'google' ? 'background: green' : ''" @click="switchBackendTo('google')">Google</button>
     </div>
 </template>
 
 <script>
-import {lastExecutions} from '../apiclient';
+import {currentBackend, lastExecutions, switchBackendTo} from '../apiclient';
 
 export default {
     data: () => ({
         lastExecutions,
+        currentBackend
     }),
+    methods: {
+        switchBackendTo(provider) {
+            switchBackendTo(provider);
+            this.$router.push({path: '/'}).catch(()=>{});
+            this.$router.go(); // Page reload
+        }
+    }
 }
 </script>
 

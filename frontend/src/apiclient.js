@@ -10,11 +10,32 @@ import jwt from 'jsonwebtoken';
  * }
  */
 export const lastExecutions = Vue.observable([]);
-export const loggedInDetails = Vue.observable({username: ''});
+export const loggedInDetails = Vue.observable({ username: '' });
 
 const sessionStorageTokenName = 'apitoken';
+const sessionStorageProviderName = 'provider';
 
-const apiBasePath = 'https://5p58wh8205.execute-api.eu-central-1.amazonaws.com/postingboard-';
+const awsBackend = 'https://5p58wh8205.execute-api.eu-central-1.amazonaws.com/postingboard-';
+const googleBackend = 'https://europe-west3-faas-test-project.cloudfunctions.net/faas-test-application-api-dev-';
+let apiBasePath;
+export const currentBackend = Vue.observable({ provider: '' });
+
+export function switchBackendTo(provider) {
+    logout();
+    sessionStorage.setItem(sessionStorageProviderName, provider);
+    refreshProvider();
+}
+
+function refreshProvider() {
+    const provider = sessionStorage.getItem(sessionStorageProviderName) ?? 'aws';
+    if (provider == 'aws') {
+        apiBasePath = awsBackend;
+        currentBackend.provider = 'aws';
+    } else {
+        apiBasePath = googleBackend;
+        currentBackend.provider = 'google';
+    }
+}
 
 let index = 0;
 
@@ -35,6 +56,9 @@ async function makeApiRequest(method, path, data) {
         let headers = {};
         if (apiToken) {
             headers.authorization = `Token ${apiToken}`;
+        }
+        if (data) {
+            headers['Content-Type'] = 'application/json';
         }
 
         const start = performance.now();
@@ -133,4 +157,5 @@ export async function addComment(threadId, text) {
 
 export function setup() {
     updateUserDetails();
+    refreshProvider();
 }

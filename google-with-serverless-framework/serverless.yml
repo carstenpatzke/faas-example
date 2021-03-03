@@ -1,0 +1,61 @@
+service: faas-test-application-api
+
+frameworkVersion: '2'
+
+provider:
+  name: google
+  stage: dev
+  runtime: nodejs14
+  region: europe-west3 # Frankfurt
+  project: faas-test-project
+  credentials: ~/.gcloud/keyfile.json
+  environment:
+    JWT_KEY: myJwtKey
+
+plugins:
+  - serverless-google-cloudfunctions
+
+package:
+  exclude:
+    - node_modules/**
+    - .gitignore
+    - .git/**
+
+functions:
+  login:
+    handler: login
+    events:
+      - http: http
+  register:
+    handler: register
+    events:
+      - http: http
+  getThreads:
+    handler: getThreads
+    events:
+      - http: http
+  getThreadAndComments:
+    handler: getThreadAndComments
+    events:
+      - http: http
+  createNewThread:
+    handler: createNewThread
+    events:
+      - http: http
+  addComment:
+    handler: addComment
+    events:
+      - http: http
+
+# Add cloud spanner database
+resources:
+  resources:
+  - name: my_cloud_spanner
+    type: gcp-types/spanner-v1:projects.instances
+    properties:
+      parent: projects/faas-test-project
+      instanceId: my-cloud-spanner-instance
+      instance:
+        config: projects/faas-test-project/instanceConfigs/regional-europe-west3
+        displayName: my cloud spanner instance
+        nodeCount: 1
